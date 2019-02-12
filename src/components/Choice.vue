@@ -2,79 +2,56 @@
 
     <div>
 
-        <div class="md-layout md-gutter">
-
-            <div class="md-layout-item">
-
-                <div>
-                    <md-progress-bar md-mode="determinate" :md-value="step"></md-progress-bar>
-                </div>
-
-
-            </div>
-
-        </div>
-
-        <div class="md-layout md-gutter">
-
-            <div class="md-layout-item">
-                <h2>{{title}}</h2>
-                <h4>step : {{step}}</h4>
-
-
-            </div>
-
-        </div>
+        <h1 style="text-align: center;">{{option(step).title}}</h1>
 
 
         <div class="md-layout md-gutter">
 
-            <md-card md-with-hover class="md-layout-item" v-for="(option, key) in options">
+            <md-card md-with-hover class="md-layout-item" v-for="(option, key) in option(step).choices">
                 <div @click="next">
                     <md-card-header class="md-primary">
                         <div class="md-title">{{option.text}}</div>
                     </md-card-header>
 
                     <md-card-content>
-                        {{key}}
+                        {{option.desc}}
                     </md-card-content>
 
                 </div>
 
             </md-card>
+
+
         </div>
-
-
     </div>
 
 
 </template>
 
 <script>
+
+    import { mapGetters } from 'vuex';
+
     export default {
         name: 'choice',
         props: ['title'],
-        data() {
-            return {
-                step: 0,
-                options: [{
-                    text: 'options 1'
-                }, {
-                    text: 'options 2'
-                }]
-            };
+        computed: {
+            ...mapGetters(['step', "option"])
         },
         watch: {
-            '$route'(to, from) {
-                this.step = parseInt(to.params.id);
+            '$route'(to) {
+                const currentStep = parseInt(to.params.id);
+                this.$store.commit('setStep', currentStep);
             }
         },
-        mounted() {
-            this.step = parseInt(this.$route.params.id);
+        created() {
+            const currentStep = parseInt(this.$route.params.id);
+            this.$store.commit('setStep', currentStep);
         },
         methods: {
             next() {
                 this.$router.push(`/next/${this.step + 1}`);
+                this.$store.commit('incrementStep', this.step + 1);
             }
         }
     };
